@@ -15,7 +15,7 @@ class CustomButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.shade400,
+          backgroundColor: Colors.green.shade900,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
       child: Text(

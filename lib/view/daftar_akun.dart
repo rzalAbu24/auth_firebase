@@ -1,6 +1,10 @@
+// import 'package:auth_mobile2/view/tabBar_login.dart';
 import 'package:auth_mobile2/view/widget/button_widget.dart';
 import 'package:auth_mobile2/view/widget/container_form.dart';
+import 'package:auth_mobile2/view/widget/show_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DaftarAkun extends StatefulWidget {
   const DaftarAkun({super.key});
@@ -18,6 +22,8 @@ class _DaftarAkunState extends State<DaftarAkun> {
   final TextEditingController _nimController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +38,12 @@ class _DaftarAkunState extends State<DaftarAkun> {
             children: [
               Container(
                 width: w,
-                height: h * 2 - 700,
+                height: h * 2 - 500,
                 decoration: BoxDecoration(
                     gradient: LinearGradient(colors: [
-                  Colors.green.shade400,
-                  Colors.green.shade600,
                   Colors.green.shade700,
+                  Colors.green.shade800,
+                  Colors.green.shade900,
                 ])),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,13 +93,14 @@ class _DaftarAkunState extends State<DaftarAkun> {
                                   boxShadow: const [
                                     BoxShadow(
                                         color:
-                                            Color.fromRGBO(15, 156, 78, 0.992),
+                                            Color.fromRGBO(1, 102, 47, 0.988),
                                         blurRadius: 20,
                                         offset: Offset(0, 10))
                                   ]),
                               child: Column(
                                 children: <Widget>[
                                   FormWidgetContainer(
+                                    // fieldKey: _formKey,
                                     controller: _namaController,
                                     hintText: 'Nama',
                                     isPasswordField: false,
@@ -105,6 +112,7 @@ class _DaftarAkunState extends State<DaftarAkun> {
                                     },
                                   ),
                                   FormWidgetContainer(
+                                    // fieldKey: _formKey,
                                     controller: _nimController,
                                     hintText: 'NIM',
                                     isPasswordField: false,
@@ -117,6 +125,7 @@ class _DaftarAkunState extends State<DaftarAkun> {
                                     },
                                   ),
                                   FormWidgetContainer(
+                                    // fieldKey: _formKey,
                                     controller: _nowhatsappController,
                                     hintText: 'No WhatsApp',
                                     isPasswordField: false,
@@ -129,6 +138,7 @@ class _DaftarAkunState extends State<DaftarAkun> {
                                     },
                                   ),
                                   FormWidgetContainer(
+                                    // fieldKey: _formKey,
                                     controller: _emailController,
                                     hintText: 'Email',
                                     isPasswordField: false,
@@ -141,6 +151,7 @@ class _DaftarAkunState extends State<DaftarAkun> {
                                     },
                                   ),
                                   FormWidgetContainer(
+                                    // fieldKey: _formKey,
                                     controller: _passwordController,
                                     hintText: 'Password',
                                     isPasswordField: true,
@@ -153,6 +164,7 @@ class _DaftarAkunState extends State<DaftarAkun> {
                                     },
                                   ),
                                   FormWidgetContainer(
+                                    // fieldKey: _formKey,
                                     controller: _confirmPasswordController,
                                     hintText: 'Ulangi Password',
                                     isPasswordField: true,
@@ -177,7 +189,13 @@ class _DaftarAkunState extends State<DaftarAkun> {
                                 height: 50,
                                 width: 150,
                                 child: CustomButton(
-                                    text: 'Daftar', onPressed: () {})),
+                                    text: 'Daftar',
+                                    onPressed: () {
+                                      if (_formKey.currentState?.validate() ??
+                                          false) {
+                                        _register();
+                                      }
+                                    })),
                           ],
                         ),
                       ),
@@ -190,5 +208,37 @@ class _DaftarAkunState extends State<DaftarAkun> {
         ),
       ),
     );
+  }
+
+  void _register() async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _confirmPasswordController.text,
+      );
+      await _firestore.collection('users').doc(userCredential.user!.uid).set({
+        'nama': _namaController.text,
+        'nim': _nimController.text,
+        'nowa': _nowhatsappController.text,
+        'email': _emailController.text,
+      });
+      // showCustomDialog(
+      //   context,
+      //   color: Colors.green,
+      //   icon: Icons.verified,
+      //   title: 'Daftar Berhasil',
+      //   content: 'Registrasi berhasil. Anda akan diarahkan ke halaman login.',
+      // );
+    } catch (e) {
+      // Tampilkan dialog gagal jika pendaftaran gagal
+      showCustomDialog(
+        context,
+        icon: Icons.error,
+        color: Colors.red,
+        title: 'Daftar Gagal',
+        content: '$e',
+      );
+    }
   }
 }
